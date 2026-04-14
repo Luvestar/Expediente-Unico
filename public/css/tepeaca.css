@@ -1,0 +1,312 @@
+/* ========================================
+   PALETA DE COLORES INSTITUCIONAL
+   H. Ayuntamiento de Tepeaca 2024-2027
+   ======================================== */
+
+:root {
+    /* Colores principales (fondos y bases) */
+    --blanco-principal: #FFFFFF;
+    --blanco-suave: #F9F6F6;
+    --blanco-rosado-claro: #EFE0E4;
+    --gris-rosado-claro: #E9DEE4;
+    --gris-rosado-suave: #F0E3E6;
+
+    /* Colores secundarios (acento principal) */
+    --morado-oscuro-principal: #7B1B58;
+    --morado-oscuro-alterno: #7E1B57;
+    --morado-medio: #7A1754;
+    --morado-profundo: #791B56;
+
+    /* Tonos pastel complementarios */
+    --rosa-grisaceo: #AF7791;
+    --rosa-claro: #E7DFE3;
+    --rosa-muy-claro: #E9DFE4;
+
+    /* COLOR OCRE DORADO */
+    --ocre-dorado: #C49A6C;
+    --ocre-dorado-claro: #D4B08C;
+    --ocre-dorado-oscuro: #A87D4F;
+    --ocre-dorado-suave: #F5EDE5;
+}
+
+/* ========================================
+   FONDO GENERAL DE LA APLICACIÓN
+   ======================================== */
+html, body, .wrapper, .content-wrapper {
+    background-color: var(--blanco-suave) !important;
+}
+
+/* ========================================
+   NAVBAR SUPERIOR
+   ======================================== */
+.main-header.navbar,
+.navbar {
+    background: linear-gradient(135deg, var(--morado-oscuro-principal), var(--morado-medio)) !important;
+    border-bottom: 3px solid var(--ocre-dorado) !important;
+}
+
+.main-header .navbar-nav .nav-link {
+    color: var(--blanco-principal) !important;
+}
+
+.main-header .navbar-nav .nav-link:hover {
+    background-color: var(--morado-medio) !important;
+}
+
+/* ========================================
+   SIDEBAR (MENÚ LATERAL)
+   ======================================== */
+.main-sidebar,
+aside {
+    background: linear-gradient(180deg, var(--morado-oscuro-principal), var(--morado-profundo)) !important;
+}
+
+.brand-link {
+    background: linear-gradient(135deg, var(--morado-medio), var(--morado-oscuro-principal)) !important;
+    border-bottom: 2px solid var(--ocre-dorado) !important;
+}
+
+.brand-text {
+    color: var(--blanco-principal) !important;
+    font-weight: bold !important;
+}
+
+.nav-sidebar .nav-link {
+    color: var(--gris-rosado-claro) !important;
+    border-left: 3px solid transparent !important;
+    transition: all 0.3s ease !important;
+}
+
+.nav-sidebar .nav-link:hover {
+    background-color: var(--morado-medio) !important;
+    color: var(--blanco-principal) !important;
+    border-left-color: var(--ocre-dorado) !important;
+}
+
+.nav-sidebar .nav-link.active {
+    background-color: var(--morado-medio) !important;
+    color: var(--blanco-principal) !important;
+    border-left: 3px solid var(--ocre-dorado) !important;
+}
+
+.nav-sidebar .nav-link i {
+    color: var(--ocre-dorado-claro) !important;
+}
+
+.nav-sidebar .nav-link:hover i {
+    color: var(--ocre-dorado) !important;
+}
+
+/* ========================================
+   BOTONES
+   ======================================== */
+.btn-primary {
+    background: linear-gradient(135deg, var(--morado-oscuro-principal), var(--morado-medio)) !important;
+    border: none !important;
+    color: var(--blanco-principal) !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--morado-medio), var(--morado-oscuro-principal)) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+}
+
+.btn-secondary {
+    background-color: var(--rosa-claro) !important;
+    border: 1px solid var(--morado-oscuro-principal) !important;
+    color: var(--morado-oscuro-principal) !important;
+}
+
+.btn-secondary:hover {
+    background-color: var(--morado-oscuro-principal) !important;
+    color: var(--blanco-principal) !important;
+}
+
+.btn-info {
+    background-color: var(--rosa-grisaceo) !important;
+    border-color: var(--rosa-grisaceo) !important;
+    color: var(--blanco-principal) !important;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--ocre-dorado), var(--ocre-dorado-claro)) !important;
+    border: none !important;
+    color: var(--morado-oscuro-principal) !important;
+    font-weight: bold !important;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, var(--ocre-dorado-claro), var(--ocre-dorado)) !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-warning {
+    background-color: var(--ocre-dorado) !important;
+    border-color: var(--ocre-dorado-oscuro) !important;
+    color: var(--morado-oscuro-principal) !important;
+}
+
+.btn-app {
+    background: linear-gradient(135deg, var(--morado-oscuro-principal), var(--morado-medio)) !important;
+    color: var(--blanco-principal) !important;
+    border: none !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
+}
+
+.btn-app i {
+    color: var(--ocre-dorado-claro) !important;
+}
+
+.btn-app:hover {
+    background: linear-gradient(135deg, var(--morado-medio), var(--morado-oscuro-principal)) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* ========================================
+   TARJETAS
+   ======================================== */
+.card {
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(123, 27, 88, 0.08) !important;
+    border-radius: 8px !important;
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--morado-oscuro-principal), var(--morado-medio)) !important;
+    color: var(--blanco-principal) !important;
+    border-radius: 8px 8px 0 0 !important;
+    padding: 15px 20px !important;
+}
+
+.card-header .card-title {
+    color: var(--blanco-principal) !important;
+    font-weight: bold !important;
+}
+
+.card-tools .btn {
+    background-color: rgba(255,255,255,0.2) !important;
+    color: var(--blanco-principal) !important;
+    border: none !important;
+}
+
+.card-tools .btn:hover {
+    background-color: rgba(255,255,255,0.3) !important;
+}
+
+/* ========================================
+   TABLAS
+   ======================================== */
+.table thead th {
+    background: linear-gradient(135deg, var(--morado-oscuro-principal), var(--morado-medio)) !important;
+    color: var(--blanco-principal) !important;
+    border-bottom: 2px solid var(--ocre-dorado) !important;
+}
+
+.table tbody tr:hover {
+    background-color: var(--rosa-muy-claro) !important;
+}
+
+/* ========================================
+   BOXES DE ESTADÍSTICAS
+   ======================================== */
+.small-box {
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 8px rgba(123, 27, 88, 0.08) !important;
+}
+
+.small-box.bg-info {
+    background: linear-gradient(135deg, var(--morado-oscuro-principal), var(--morado-medio)) !important;
+}
+
+.small-box.bg-success {
+    background: linear-gradient(135deg, var(--ocre-dorado), var(--ocre-dorado-claro)) !important;
+}
+
+.small-box.bg-success .inner h3,
+.small-box.bg-success .inner p {
+    color: var(--morado-oscuro-principal) !important;
+}
+
+.small-box-footer {
+    background-color: rgba(0,0,0,0.1) !important;
+    color: var(--blanco-principal) !important;
+    padding: 10px !important;
+}
+
+/* ========================================
+   PESTAÑAS Y NAVEGACIÓN
+   ======================================== */
+.nav-tabs .nav-link.active {
+    color: var(--morado-oscuro-principal) !important;
+    border-bottom-color: var(--ocre-dorado) !important;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: var(--ocre-dorado-claro) !important;
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+.main-footer {
+    background: linear-gradient(135deg, var(--morado-oscuro-principal), var(--morado-medio)) !important;
+    color: var(--blanco-principal) !important;
+    border-top: 3px solid var(--ocre-dorado) !important;
+}
+
+.main-footer a {
+    color: var(--ocre-dorado-claro) !important;
+}
+
+.main-footer a:hover {
+    color: var(--ocre-dorado) !important;
+}
+
+/* ========================================
+   BORDES Y DETALLES
+   ======================================== */
+.dropdown-menu {
+    border-top: 3px solid var(--ocre-dorado) !important;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--morado-oscuro-principal) !important;
+    border-color: var(--ocre-dorado) !important;
+}
+
+.pagination .page-link:hover {
+    color: var(--ocre-dorado) !important;
+}
+
+/* ========================================
+   FONDO PARA EL ÁREA DE ADMINISTRADOR
+   ======================================== */
+.content-wrapper {
+    background-image: url('/images/fondo-tepeaca.jpg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+    position: relative;
+}
+
+/* Overlay para mejorar legibilidad */
+.content-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.88);
+    z-index: 1;
+}
+
+/* Asegurar que el contenido esté por encima del overlay */
+.content-wrapper > .content,
+.content-wrapper > .content-header {
+    position: relative;
+    z-index: 2;
+}
