@@ -3,6 +3,18 @@
 @section('title', 'Estadísticas')
 
 @section('content')
+<script>
+    // Capturar token de la sesión flash (para autenticación por pestaña)
+    const token = '{{ session('token') }}';
+    if (token && token !== '') {
+        sessionStorage.setItem('pestania_token', token);
+        // Limpiar la URL si viene con token
+        if (window.location.search.includes('token')) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }
+</script>
+
 <div class="container-fluid">
     {{-- TARJETAS DE RESUMEN --}}
     <div class="row">

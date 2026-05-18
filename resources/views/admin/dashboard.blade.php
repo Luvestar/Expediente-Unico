@@ -12,6 +12,15 @@
 @stop
 
 @section('content')
+<script>
+    const token = '{{ session('token') }}';
+    if (token && token !== '') {
+        sessionStorage.setItem('pestania_token', token);
+        if (window.location.search.includes('token')) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }
+</script>
     {{-- TARJETAS GLOBALES --}}
     <div class="row">
         <div class="col-lg-3 col-6">

@@ -3,6 +3,15 @@
 @section('title', 'Consultar información')
 
 @section('content')
+<script>
+    const token = '{{ session('token') }}';
+    if (token && token !== '') {
+        sessionStorage.setItem('pestania_token', token);
+        if (window.location.search.includes('token')) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }
+</script>
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -66,7 +75,7 @@
                             </table>
                         </div>
                         
-                        {{-- PAGINACIÓN --}}  /// las consultas son mas cortas para evitar el colapso del sistema
+                        {{-- PAGINACIÓN --}}  
                         <div class="d-flex justify-content-center mt-4">
                             {{ $resultados->appends(request()->query())->links() }}
                         </div>

@@ -25,6 +25,7 @@
 
                         <form action="{{ route('industria.documentos.guardar') }}" method="POST" enctype="multipart/form-data">
                             @csrf
+                            <input type="hidden" name="pestania_token" id="pestania_token" value="">
                             <input type="hidden" name="contribuyente_id" value="{{ $contribuyenteSeleccionado->id }}">
 
                             <div class="accordion" id="accordionProcesos">

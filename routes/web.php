@@ -14,7 +14,7 @@ Route::get('/', function () {
 });
 
 // Rutas protegidas por autenticación
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -22,7 +22,7 @@ Route::middleware(['auth'])->group(function () {
     // ADMINISTRACIÓN
     Route::prefix('admin')->middleware(['rol:administrador'])->group(function () {
         
-        // USUARIOS
+        // USUARIOSS
         Route::get('/usuarios/crear', [UsuarioController::class, 'create'])->name('admin.usuarios.crear');
         Route::post('/usuarios/guardar', [UsuarioController::class, 'store'])->name('admin.usuarios.guardar');
         Route::get('/usuarios', [UsuarioController::class, 'index'])->name('admin.usuarios');
@@ -32,10 +32,10 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/usuarios/{id}/toggle-estado', [UsuarioController::class, 'toggleEstado'])->name('admin.usuarios.toggle');
         
         // PERMISOS Y ROLES
-Route::get('/permisos', [App\Http\Controllers\Admin\RoleController::class, 'index'])->name('admin.permisos');
-Route::get('/permisos/{id}/editar', [App\Http\Controllers\Admin\RoleController::class, 'edit'])->name('admin.permisos.editar');
-Route::put('/permisos/{id}', [App\Http\Controllers\Admin\RoleController::class, 'update'])->name('admin.permisos.update');
-Route::post('/permisos/asignar-usuario', [App\Http\Controllers\Admin\RoleController::class, 'asignarUsuario'])->name('admin.permisos.asignar');
+        Route::get('/permisos', [App\Http\Controllers\Admin\RoleController::class, 'index'])->name('admin.permisos');
+        Route::get('/permisos/{id}/editar', [App\Http\Controllers\Admin\RoleController::class, 'edit'])->name('admin.permisos.editar');
+        Route::put('/permisos/{id}', [App\Http\Controllers\Admin\RoleController::class, 'update'])->name('admin.permisos.update');
+        Route::post('/permisos/asignar-usuario', [App\Http\Controllers\Admin\RoleController::class, 'asignarUsuario'])->name('admin.permisos.asignar');
         // Configuración
         Route::get('/configuracion', [App\Http\Controllers\Admin\ConfiguracionController::class, 'index'])->name('admin.configuracion');
         Route::post('/configuracion/general', [App\Http\Controllers\Admin\ConfiguracionController::class, 'actualizarConfiguracionGeneral'])->name('admin.configuracion.general');
@@ -46,7 +46,7 @@ Route::post('/permisos/asignar-usuario', [App\Http\Controllers\Admin\RoleControl
     // ============================================
 // MÓDULO DE INDUSTRIA Y COMERCIO 
 // ============================================
-Route::prefix('industria')->middleware(['auth', 'verified', 'area:1'])->group(function () {
+Route::prefix('industria')->middleware([ 'auth', 'verified', 'area:1', 'rol:Administrador de área,Jefe de área,Usuario'])->group(function () {
     
     // Dashboard del área
     Route::get('/estadisticas', [App\Http\Controllers\Industria\DashboardController::class, 'index'])->name('industria.estadisticas');
@@ -98,7 +98,7 @@ Route::prefix('industria')->middleware(['auth', 'verified', 'area:1'])->group(fu
     // ============================================
     // MÓDULO DE DESARROLLO URBANO 
     // ============================================
-    Route::prefix('desarrollo')->middleware(['auth', 'verified', 'area:2'])->group(function () {
+    Route::prefix('desarrollo')->middleware(['auth', 'verified', 'area:2', 'rol:Administrador de área,Jefe de área,Usuario'])->group(function () {
         
         // Agregar Datos / Subir Documentos
         Route::get('/agregar-datos', [App\Http\Controllers\Desarrollo\DocumentoController::class, 'index'])->name('desarrollo.documentos.index');
@@ -135,7 +135,7 @@ Route::prefix('industria')->middleware(['auth', 'verified', 'area:1'])->group(fu
     // ============================================
     // MÓDULO DE PROTECCIÓN CIVIL
     // ============================================
-    Route::prefix('proteccion')->middleware(['auth', 'verified', 'area:3'])->group(function () {
+    Route::prefix('proteccion')->middleware(['auth', 'verified', 'area:3', 'rol:Administrador de área,Jefe de área,Usuario'])->group(function () {
         
         // Agregar Datos / Subir Documentos
         Route::get('/agregar-datos', [App\Http\Controllers\Proteccion\DocumentoController::class, 'index'])->name('proteccion.documentos.index');
@@ -170,7 +170,7 @@ Route::prefix('industria')->middleware(['auth', 'verified', 'area:1'])->group(fu
     // ============================================
     // MÓDULO DE INGRESOS
     // ============================================
-    Route::prefix('ingresos')->middleware(['auth', 'verified', 'area:4'])->group(function () {    
+    Route::prefix('ingresos')->middleware(['auth', 'verified', 'area:4', 'rol:Administrador de área,Jefe de área,Usuario'])->group(function () {    
         // Agregar Datos / Subir Documentos
         Route::get('/agregar-datos', [App\Http\Controllers\Ingresos\DocumentoController::class, 'index'])->name('ingresos.documentos.index');
         Route::get('/agregar-datos/cargar/{contribuyente_id}', [App\Http\Controllers\Ingresos\DocumentoController::class, 'create'])->name('ingresos.documentos.cargar');
@@ -195,8 +195,10 @@ Route::prefix('industria')->middleware(['auth', 'verified', 'area:1'])->group(fu
         
         // Órdenes de cobro (solo visualización)
         Route::get('/ordenes-cobro', [App\Http\Controllers\OrdenCobroController::class, 'index'])->name('ingresos.ordenes.cobro');
-        Route::get('/orden-cobro/{id}', [App\Http\Controllers\OrdenCobroController::class, 'show'])->name('ingresos.orden.cobro.ver');
+        Route::get('/orden-cobro/{id}', [App\Http\Controllers\OrdenCobroController::class, 'show'])->name('ingresos.orden.cobro.show');
         Route::get('/orden-cobro/contribuyente/{contribuyente_id}', [App\Http\Controllers\OrdenCobroController::class, 'porContribuyente'])->name('ingresos.orden.cobro.por.contribuyente');
+        Route::get('/orden-cobro/{id}/descargar/{tipo}', [App\Http\Controllers\OrdenCobroController::class, 'descargarPdf'])->name('ingresos.orden.cobro.descargar');
+        Route::get('/orden-cobro/{id}/ver/{tipo}', [App\Http\Controllers\OrdenCobroController::class, 'verPdf'])->name('ingresos.orden.cobro.ver');
         // Exportar CSV desde el historial
         Route::get('/historial/exportar-csv', [App\Http\Controllers\Ingresos\HistorialController::class, 'exportarCSV'])->name('ingresos.historial.exportar.csv');
     });

@@ -33,6 +33,7 @@
         <div class="card-body">
             <form action="{{ route('admin.usuarios.guardar') }}" method="POST">
                 @csrf
+                <input type="hidden" name="pestania_token" id="pestania_token" value="">
                 
                 <!-- DATOS PERSONALES -->
                 <div class="card card-primary">

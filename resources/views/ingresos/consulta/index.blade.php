@@ -3,6 +3,21 @@
 @section('title', 'Consultar información')
 
 @section('content')
+<script>
+    // Capturar token para autenticación por pestaña
+    const token = '{{ session('token') }}';
+    if (token && token !== '') {
+        sessionStorage.setItem('pestania_token', token);
+        if (window.location.search.includes('token')) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }
+</script>
+
+<div class="container-fluid">
+    {{-- resto del contenido --}}
+</div>
+
 <div class="card">
     <div class="card-header bg-primary text-white">
         <h4><i class="fas fa-search"></i> Consultar contribuyentes</h4>

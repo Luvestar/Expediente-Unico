@@ -3,6 +3,15 @@
 @section('title', 'Agregar datos')
 
 @section('content')
+<script>
+    const token = '{{ session('token') }}';
+    if (token && token !== '') {
+        sessionStorage.setItem('pestania_token', token);
+        if (window.location.search.includes('token')) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }
+</script>
 <div class="card">
     <div class="card-header bg-primary text-white">
         <h4><i class="fas fa-search"></i> Buscar contribuyente</h4>

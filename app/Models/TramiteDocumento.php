@@ -29,7 +29,7 @@ class TramiteDocumento extends Model
 
         static::creating(function ($model) {
             if (is_null($model->area_id)) {
-                $user = Auth::user();
+                $user = auth('sanctum')->user();
                 if ($user && $user->area_id) {
                     $model->area_id = $user->area_id;
                 }

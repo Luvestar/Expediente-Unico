@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Contribuyente;
 use App\Models\OrdenCobro;
+use Illuminate\Support\Facades\Storage;
 
 class OrdenCobroController extends Controller
 {
-    // Mostrar formulario (crear o editar)
     public function form($contribuyenteId, $ordenId = null)
     {
         $contribuyente = Contribuyente::findOrFail($contribuyenteId);
@@ -25,54 +25,117 @@ class OrdenCobroController extends Controller
         
         return view('orden_cobro.form', compact(
             'contribuyente', 'orden', 'layout', 'routeStore', 'routeBack', 'area'
-        ));
+        ))->with('usuario', auth('sanctum')->user());
     }
     
-    // Guardar orden de cobro
     public function store(Request $request)
     {
         $request->validate([
             'contribuyente_id' => 'required|exists:contribuyentes,id',
-            'folio' => 'required|string|max:50',
-            'orden_cobro' => 'nullable|string',
-            'cotizacion' => 'nullable|string',
+            'orden_cobro_pdf' => 'nullable|file|mimes:pdf|max:5120',
+            'cotizacion_pdf' => 'nullable|file|mimes:pdf|max:5120',
         ]);
         
         $area = $this->getAreaFromUrl();
         $areaId = $this->getAreaId($area);
         
-        OrdenCobro::updateOrCreate(
-            [
-                'id' => $request->orden_id,
-            ],
+        $orden = OrdenCobro::updateOrCreate(
+            ['id' => $request->orden_id],
             [
                 'contribuyente_id' => $request->contribuyente_id,
                 'area_id' => $areaId,
-                'folio' => $request->folio,
-                'orden_cobro' => $request->orden_cobro,
-                'cotizacion' => $request->cotizacion,
             ]
         );
+        
+        if ($request->hasFile('orden_cobro_pdf')) {
+            if ($orden->orden_cobro_pdf && Storage::disk('public')->exists($orden->orden_cobro_pdf)) {
+                Storage::disk('public')->delete($orden->orden_cobro_pdf);
+            }
+            
+            $path = $request->file('orden_cobro_pdf')->store(
+                'ordenes_cobro/' . date('Y/m'),
+                'public'
+            );
+            $orden->orden_cobro_pdf = $path;
+        }
+        
+        if ($request->hasFile('cotizacion_pdf')) {
+            if ($orden->cotizacion_pdf && Storage::disk('public')->exists($orden->cotizacion_pdf)) {
+                Storage::disk('public')->delete($orden->cotizacion_pdf);
+            }
+            
+            $path = $request->file('cotizacion_pdf')->store(
+                'ordenes_cobro/' . date('Y/m'),
+                'public'
+            );
+            $orden->cotizacion_pdf = $path;
+        }
+        
+        $orden->save();
         
         return redirect()->route($area . '.consultar')
             ->with('success', 'Orden de cobro guardada correctamente');
     }
     
-    // Ver todas las órdenes (solo para Ingresos)
     public function index()
     {
         $ordenes = OrdenCobro::with(['contribuyente', 'area'])
             ->orderBy('created_at', 'desc')
             ->get();
         
-        return view('orden_cobro.lista', compact('ordenes'));
+        return view('orden_cobro.lista', compact('ordenes'))->with('usuario', auth('sanctum')->user());
     }
     
-    // Ver detalle de una orden (solo para Ingresos)
     public function show($id)
     {
         $orden = OrdenCobro::with(['contribuyente', 'area'])->findOrFail($id);
-        return view('orden_cobro.detalle', compact('orden'));
+        return view('orden_cobro.detalle', compact('orden'))->with('usuario', auth('sanctum')->user());
+    }
+    
+    public function porContribuyente($contribuyenteId)
+    {
+        $contribuyente = Contribuyente::findOrFail($contribuyenteId);
+        $ordenes = OrdenCobro::with(['area'])
+            ->where('contribuyente_id', $contribuyenteId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return view('ingresos.consulta.ordenes_contribuyente', compact('contribuyente', 'ordenes'))->with('usuario', auth('sanctum')->user());
+    }
+    
+    public function descargarPdf($id, $tipo)
+    {
+        $orden = OrdenCobro::findOrFail($id);
+        
+        $campo = ($tipo === 'orden') ? 'orden_cobro_pdf' : 'cotizacion_pdf';
+        $nombre = ($tipo === 'orden') ? 'orden_cobro' : 'cotizacion';
+        
+        if (!$orden->$campo || !Storage::disk('public')->exists($orden->$campo)) {
+            abort(404, 'Archivo no encontrado');
+        }
+        
+        $contribuyente = $orden->contribuyente;
+        $filename = $nombre . '_' . $contribuyente->id . '_' . date('Ymd') . '.pdf';
+        
+        return Storage::disk('public')->download($orden->$campo, $filename);
+    }
+    
+    public function verPdf($id, $tipo)
+    {
+        $orden = OrdenCobro::findOrFail($id);
+        
+        $campo = ($tipo === 'orden') ? 'orden_cobro_pdf' : 'cotizacion_pdf';
+        
+        if (!$orden->$campo || !Storage::disk('public')->exists($orden->$campo)) {
+            abort(404, 'Archivo no encontrado');
+        }
+        
+        $path = storage_path('app/public/' . $orden->$campo);
+        
+        return response()->file($path, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . basename($path) . '"'
+        ]);
     }
     
     private function getAreaFromUrl()
@@ -97,17 +160,4 @@ class OrdenCobroController extends Controller
             default => null
         };
     }
-
-    // Ver órdenes de cobro de un contribuyente específico (para Ingresos)
-public function porContribuyente($contribuyenteId)
-{
-    $contribuyente = Contribuyente::findOrFail($contribuyenteId);
-    
-    $ordenes = OrdenCobro::with(['area'])
-        ->where('contribuyente_id', $contribuyenteId)
-        ->orderBy('created_at', 'desc')
-        ->get();
-    
-    return view('ingresos.consulta.ordenes_contribuyente', compact('contribuyente', 'ordenes'));
-}
 }

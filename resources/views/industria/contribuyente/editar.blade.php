@@ -11,6 +11,7 @@
         <div class="card-body">
             <form action="{{ route('industria.contribuyente.actualizar', $contribuyente->id) }}" method="POST">
                 @csrf
+                <input type="hidden" name="pestania_token" id="pestania_token" value="">
                 @method('PUT')
 
                 <div class="row">
