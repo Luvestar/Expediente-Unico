@@ -14,7 +14,6 @@
             box-sizing: border-box;
         }
         
-        /* Variables de colores institucionales */
         :root {
             --morado-principal: #7B1B58;
             --morado-claro: #7A1754;
@@ -34,7 +33,6 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        /* Overlay con gradiente institucional */
         body::before {
             content: '';
             position: absolute;
@@ -61,7 +59,7 @@
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             width: 100%;
-            max-width: 420px;
+            max-width: 450px;
             overflow: hidden;
             animation: fadeInUp 0.6s ease;
         }
@@ -102,6 +100,51 @@
             display: block;
             margin-top: 5px;
         }
+        
+        .area-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .area-btn {
+            background: #f0f0f0;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 25px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #555;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .area-btn:hover {
+            transform: translateY(-2px);
+            text-decoration: none;
+            color: white;
+        }
+        
+        .area-btn.active {
+            background: linear-gradient(135deg, var(--morado-principal), var(--morado-claro));
+            color: white;
+            box-shadow: 0 2px 10px rgba(123, 27, 88, 0.3);
+        }
+        
+        .area-btn.admin { background: #2c3e50; color: white; }
+        .area-btn.admin.active { background: #1a252f; }
+        .area-btn.industria { background: #3498db; color: white; }
+        .area-btn.industria.active { background: #2980b9; }
+        .area-btn.desarrollo { background: #27ae60; color: white; }
+        .area-btn.desarrollo.active { background: #1e8449; }
+        .area-btn.proteccion { background: #e67e22; color: white; }
+        .area-btn.proteccion.active { background: #ca6f1e; }
+        .area-btn.ingresos { background: #f39c12; color: white; }
+        .area-btn.ingresos.active { background: #d68910; }
         
         .login-body {
             padding: 35px 30px;
@@ -153,10 +196,6 @@
             background: linear-gradient(135deg, var(--morado-claro), var(--morado-oscuro));
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(123, 27, 88, 0.4);
-        }
-        
-        .btn-login:active {
-            transform: translateY(0);
         }
         
         .checkbox-container {
@@ -221,6 +260,21 @@
         .alert-success i {
             margin-right: 8px;
         }
+        
+        .guard-badge {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .guard-badge.admin { background: #2c3e50; color: white; }
+        .guard-badge.industria { background: #3498db; color: white; }
+        .guard-badge.desarrollo { background: #27ae60; color: white; }
+        .guard-badge.proteccion { background: #e67e22; color: white; }
+        .guard-badge.ingresos { background: #f39c12; color: white; }
     </style>
 </head>
 <body>
@@ -232,6 +286,50 @@
                 <small>H. Ayuntamiento de Tepeaca 2024-2027</small>
             </div>
             <div class="login-body">
+                <!-- Badge del área seleccionada -->
+                <div class="guard-badge {{ $guard }}">
+                    <i class="fas 
+                        @if($guard == 'admin') fa-user-shield
+                        @elseif($guard == 'industria') fa-industry
+                        @elseif($guard == 'desarrollo') fa-city
+                        @elseif($guard == 'proteccion') fa-shield-alt
+                        @elseif($guard == 'ingresos') fa-coins
+                        @else fa-building
+                        @endif
+                    "></i>
+                    @if($guard == 'admin') Panel Administrador
+                    @elseif($guard == 'industria') Industria y Comercio
+                    @elseif($guard == 'desarrollo') Desarrollo Urbano
+                    @elseif($guard == 'proteccion') Protección Civil
+                    @elseif($guard == 'ingresos') Ingresos
+                    @else Acceso General
+                    @endif
+                </div>
+                
+                <!-- Selector de área -->
+                <div class="area-selector">
+                    <a href="{{ route('login', ['guard' => 'admin']) }}" 
+                       class="area-btn admin {{ $guard == 'admin' ? 'active' : '' }}">
+                        <i class="fas fa-user-shield"></i> Admin
+                    </a>
+                    <a href="{{ route('login', ['guard' => 'industria']) }}" 
+                       class="area-btn industria {{ $guard == 'industria' ? 'active' : '' }}">
+                        <i class="fas fa-industry"></i> Industria
+                    </a>
+                    <a href="{{ route('login', ['guard' => 'desarrollo']) }}" 
+                       class="area-btn desarrollo {{ $guard == 'desarrollo' ? 'active' : '' }}">
+                        <i class="fas fa-city"></i> Desarrollo
+                    </a>
+                    <a href="{{ route('login', ['guard' => 'proteccion']) }}" 
+                       class="area-btn proteccion {{ $guard == 'proteccion' ? 'active' : '' }}">
+                        <i class="fas fa-shield-alt"></i> Protección
+                    </a>
+                    <a href="{{ route('login', ['guard' => 'ingresos']) }}" 
+                       class="area-btn ingresos {{ $guard == 'ingresos' ? 'active' : '' }}">
+                        <i class="fas fa-coins"></i> Ingresos
+                    </a>
+                </div>
+
                 <!-- Session Status -->
                 @if(session('status'))
                     <div class="alert alert-success">
@@ -248,6 +346,9 @@
 
                 <form method="POST" action="{{ route('login') }}">
                     @csrf
+                    
+                    <!-- Campo oculto para el guard -->
+                    <input type="hidden" name="guard" value="{{ $guard }}">
 
                     <!-- Email Address -->
                     <div class="form-group">
@@ -263,7 +364,7 @@
                                    name="email" 
                                    value="{{ old('email') }}" 
                                    placeholder="usuario@tepeaca.com"
-                                   required autofocus autocomplete="username">
+                                   required autofocus>
                         </div>
                         @error('email')
                             <small class="text-danger d-block mt-1">{{ $message }}</small>
@@ -283,7 +384,7 @@
                                    class="form-control @error('password') is-invalid @enderror"
                                    name="password"
                                    placeholder="••••••••"
-                                   required autocomplete="current-password">
+                                   required>
                         </div>
                         @error('password')
                             <small class="text-danger d-block mt-1">{{ $message }}</small>

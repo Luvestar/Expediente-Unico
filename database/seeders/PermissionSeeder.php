@@ -15,51 +15,10 @@ class PermissionSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // ==========================================
-        // CREAR PERMISOS (SOLO LOS QUE EXISTEN)
+        // PERMISOS PARA GUARD 'web' (Áreas)
         // ==========================================
         
-        // Permisos para contribuyentes
-        Permission::create(['name' => 'ver contribuyentes']);
-        Permission::create(['name' => 'crear contribuyentes']);
-        Permission::create(['name' => 'editar contribuyentes']);
-        Permission::create(['name' => 'eliminar contribuyentes']);
-        
-        // Permisos para documentos
-        Permission::create(['name' => 'ver documentos']);
-        Permission::create(['name' => 'subir documentos']);
-        
-        // Permisos para consultas
-        Permission::create(['name' => 'ver expediente']);
-        Permission::create(['name' => 'ver cotejo']);
-        Permission::create(['name' => 'ver historial']);
-        Permission::create(['name' => 'exportar csv']);
-        
-        // Permisos para órdenes de cobro
-        Permission::create(['name' => 'crear ordenes']);
-        Permission::create(['name' => 'ver ordenes']);
-        
-        // Permisos de acceso por área
-        Permission::create(['name' => 'acceso industria']);
-        Permission::create(['name' => 'acceso desarrollo']);
-        Permission::create(['name' => 'acceso proteccion']);
-        Permission::create(['name' => 'acceso ingresos']);
-        
-        // Permisos de administración (solo para admin general)
-        Permission::create(['name' => 'administrar usuarios']);
-        Permission::create(['name' => 'ver configuracion']);
-        Permission::create(['name' => 'editar configuracion']);
-        
-        // ==========================================
-        // CREAR ROLES
-        // ==========================================
-        
-        // Rol: Administrador General (todos los permisos)
-        $adminGeneral = Role::create(['name' => 'Administrador general']);
-        $adminGeneral->givePermissionTo(Permission::all());
-        
-        // Rol: Administrador de área
-        $adminArea = Role::create(['name' => 'Administrador de área']);
-        $adminArea->givePermissionTo([
+        $permisosWeb = [
             'ver contribuyentes',
             'crear contribuyentes',
             'editar contribuyentes',
@@ -76,78 +35,135 @@ class PermissionSeeder extends Seeder
             'acceso desarrollo',
             'acceso proteccion',
             'acceso ingresos',
-        ]);
+        ];
         
-        // Rol: Jefe de área
-        $jefeArea = Role::create(['name' => 'Jefe de área']);
-        $jefeArea->givePermissionTo([
-            'ver contribuyentes',
-            'crear contribuyentes',
-            'ver documentos',
-            'subir documentos',
-            'ver expediente',
-            'ver cotejo',
-            'ver historial',
-            'exportar csv',
-            'crear ordenes',
-            'ver ordenes',
-            'acceso industria',
-            'acceso desarrollo',
-            'acceso proteccion',
-            'acceso ingresos',
-        ]);
+        foreach ($permisosWeb as $permiso) {
+            Permission::firstOrCreate([
+                'name' => $permiso,
+                'guard_name' => 'web'
+            ]);
+        }
         
-        // Rol: Usuario
-        $usuario = Role::create(['name' => 'Usuario']);
-        $usuario->givePermissionTo([
-            'ver contribuyentes',
-            'crear contribuyentes',
-            'ver documentos',
-            'subir documentos',
-            'ver expediente',
-            'ver cotejo',
-            'ver historial',
-            'exportar csv',
-            'crear ordenes',
-            'ver ordenes',
-            'acceso industria',
-            'acceso desarrollo',
-            'acceso proteccion',
-            'acceso ingresos',
+        // ==========================================
+        // PERMISOS PARA GUARD 'admin'
+        // ==========================================
+        
+        $permisosAdmin = [
+            'ver usuarios',
+            'crear usuarios',
+            'editar usuarios',
+            'eliminar usuarios',
+            'ver roles',
+            'asignar roles',
+            'ver configuracion',
+            'editar configuracion',
+            'ver dashboard',
+        ];
+        
+        foreach ($permisosAdmin as $permiso) {
+            Permission::firstOrCreate([
+                'name' => $permiso,
+                'guard_name' => 'admin'
+            ]);
+        }
+        
+        // ==========================================
+        // CREAR ROLES PARA GUARD 'web' (Áreas)
+        // ==========================================
+        
+        // Administrador de área (todos los permisos web)
+        $adminArea = Role::firstOrCreate([
+            'name' => 'Administrador de área',
+            'guard_name' => 'web'
         ]);
+        $adminArea->syncPermissions(Permission::where('guard_name', 'web')->get());
+        
+        // Jefe de área (permisos sin eliminar)
+        $jefeArea = Role::firstOrCreate([
+            'name' => 'Jefe de área',
+            'guard_name' => 'web'
+        ]);
+        $jefeArea->syncPermissions(Permission::where('guard_name', 'web')
+            ->whereNotIn('name', ['eliminar contribuyentes'])
+            ->get());
+        
+        // Usuario (permisos básicos)
+        $usuario = Role::firstOrCreate([
+            'name' => 'Usuario',
+            'guard_name' => 'web'
+        ]);
+        $usuario->syncPermissions(Permission::where('guard_name', 'web')
+            ->whereIn('name', [
+                'ver contribuyentes',
+                'ver documentos',
+                'ver expediente',
+                'ver cotejo',
+                'ver historial',
+                'acceso industria',
+                'acceso desarrollo',
+                'acceso proteccion',
+                'acceso ingresos'
+            ])->get());
+        
+        // ==========================================
+        // CREAR ROLES PARA GUARD 'admin'
+        // ==========================================
+        
+        // Administrador general (todos los permisos)
+        $adminGeneral = Role::firstOrCreate([
+            'name' => 'Administrador general',
+            'guard_name' => 'admin'
+        ]);
+        $adminGeneral->syncPermissions(Permission::where('guard_name', 'admin')->get());
+        
+        // Administrador de área (permisos de admin)
+        $adminAreaAdmin = Role::firstOrCreate([
+            'name' => 'Administrador de área',
+            'guard_name' => 'admin'
+        ]);
+        $adminAreaAdmin->syncPermissions(Permission::where('guard_name', 'admin')->get());
+        
+        // Jefe de área (permisos de admin)
+        $jefeAreaAdmin = Role::firstOrCreate([
+            'name' => 'Jefe de área',
+            'guard_name' => 'admin'
+        ]);
+        $jefeAreaAdmin->syncPermissions(Permission::where('guard_name', 'admin')->get());
+        
+        // Usuario (permisos de admin)
+        $usuarioAdmin = Role::firstOrCreate([
+            'name' => 'Usuario',
+            'guard_name' => 'admin'
+        ]);
+        $usuarioAdmin->syncPermissions(Permission::where('guard_name', 'admin')->get());
         
         // ==========================================
         // ASIGNAR ROLES A USUARIOS EXISTENTES
         // ==========================================
         
-        // Administrador general
+        // Administrador general (usa guard admin)
         $adminUser = User::where('email', 'admin@expedienteunico.com')->first();
         if ($adminUser) {
-            $adminUser->assignRole('Administrador general');
+            $adminUser->assignRole($adminGeneral);
+            $this->command->info("✅ Rol 'Administrador general' asignado a {$adminUser->email}");
         }
         
-        // Industria
-        $industriaUser = User::where('email', 'industria@tepeaca.com')->first();
-        if ($industriaUser) {
-            $industriaUser->assignRole('Administrador de área');
+        // Usuarios por área (usan guard web)
+        $areasUsers = [
+            'industria@tepeaca.com' => 'Industria',
+            'desarrollo@tepeaca.com' => 'Desarrollo',
+            'proteccion@tepeaca.com' => 'Protección',
+            'ingresos@tepeaca.com' => 'Ingresos',
+        ];
+        
+        foreach ($areasUsers as $email => $area) {
+            $user = User::where('email', $email)->first();
+            if ($user) {
+                $user->assignRole($adminArea);
+                $this->command->info("✅ Rol 'Administrador de área' asignado a {$user->email} ({$area})");
+            }
         }
         
-        // Desarrollo
-        $desarrolloUser = User::where('email', 'desarrollo@tepeaca.com')->first();
-        if ($desarrolloUser) {
-            $desarrolloUser->assignRole('Administrador de área');
-        }
-        
-        // Protección
-        $proteccionUser = User::where('email', 'proteccion@tepeaca.com')->first();
-        if ($proteccionUser) {
-            $proteccionUser->assignRole('Administrador de área');
-        }
-        
-        // Ingresos
-        $ingresosUser = User::where('email', 'ingresos@tepeaca.com')->first();
-        if ($ingresosUser) {
-            $ingresosUser->assignRole('Administrador de área');
-        }
+        $this->command->info('🎉 Seeder ejecutado correctamente!');
     }
 }

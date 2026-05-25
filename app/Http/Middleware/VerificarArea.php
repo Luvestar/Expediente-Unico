@@ -10,15 +10,27 @@ class VerificarArea
 {
     public function handle(Request $request, Closure $next, $areaPermitida)
     {
-        $user = Auth::user();
+        $guard = 'web';
         
-        // Administrador general puede acceder a todo
-        if ($user->hasRole('Administrador general')) {
+        if ($request->is('admin*')) {
+            $guard = 'admin';
+        } elseif ($request->is('industria*')) {
+            $guard = 'industria';
+        } elseif ($request->is('desarrollo*')) {
+            $guard = 'desarrollo';
+        } elseif ($request->is('proteccion*')) {
+            $guard = 'proteccion';
+        } elseif ($request->is('ingresos*')) {
+            $guard = 'ingresos';
+        }
+        
+        $user = Auth::guard($guard)->user();
+        
+        if ($user && $user->rol === 'Administrador general') {
             return $next($request);
         }
         
-        // Verificar que el área del usuario coincida con el área permitida
-        if ($user->area_id != $areaPermitida) {
+        if (!$user || $user->area_id != $areaPermitida) {
             abort(403, 'No tienes permiso para acceder a esta área.');
         }
         

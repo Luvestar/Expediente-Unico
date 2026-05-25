@@ -1,3 +1,8 @@
+@php
+    $currentGuard = session('current_guard', 'web');
+    $user = Auth::guard($currentGuard)->user();
+@endphp
+
 <!-- Settings Dropdown -->
 <div class="hidden sm:flex sm:items-center sm:ms-6">
     <x-dropdown align="right" width="48">
@@ -5,14 +10,14 @@
             <button class="flex items-center space-x-3 focus:outline-none">
                 <div class="text-right">
                     <div class="font-medium text-gray-700">
-                        {{ Auth::user()->nombre_completo ?? Auth::user()->name }}
+                        {{ $user->nombre_completo ?? $user->name ?? 'Usuario' }}
                     </div>
                     <div class="text-xs text-gray-500">
-                        {{ Auth::user()->area->nombre ?? 'Sistema' }}
+                        {{ $user->area->nombre ?? ($currentGuard == 'admin' ? 'Administrador' : 'Sistema') }}
                     </div>
                 </div>
                 <div class="w-9 h-9 rounded-full bg-primary-600 flex items-center justify-center text-white font-bold">
-                    {{ strtoupper(substr(Auth::user()->nombre_completo ?? Auth::user()->name, 0, 1)) }}
+                    {{ strtoupper(substr($user->nombre_completo ?? $user->name ?? 'U', 0, 1)) }}
                 </div>
             </button>
         </x-slot>

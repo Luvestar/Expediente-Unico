@@ -10,25 +10,41 @@ class VerificarRol
 {
     public function handle(Request $request, Closure $next, ...$roles)
     {
-        if (!Auth::check()) {
-            return redirect('login');
-        }
-
-        $user = Auth::user();
+        $guard = 'web';
         
-        // Si no se especifican roles, permitir acceso a cualquier usuario autenticado
+        if ($request->is('admin*')) {
+            $guard = 'admin';
+        } elseif ($request->is('industria*')) {
+            $guard = 'industria';
+        } elseif ($request->is('desarrollo*')) {
+            $guard = 'desarrollo';
+        } elseif ($request->is('proteccion*')) {
+            $guard = 'proteccion';
+        } elseif ($request->is('ingresos*')) {
+            $guard = 'ingresos';
+        }
+        
+        $user = Auth::guard($guard)->user();
+        
+        if (!$user) {
+            return redirect()->route('login', ['guard' => $guard]);
+        }
+        
+        // Administrador general puede acceder a todo
+        if ($user->rol === 'Administrador general') {
+            return $next($request);
+        }
+        
         if (empty($roles)) {
             return $next($request);
         }
         
-        // Verificar si el usuario tiene el rol requerido
         foreach ($roles as $rol) {
             if ($user->rol === $rol) {
                 return $next($request);
             }
         }
 
-        // Si no tiene permiso, redirigir
-        return redirect('/dashboard')->with('error', 'No tienes permiso para acceder a esta área.');
+        abort(403, 'No tienes permiso para acceder a esta área.');
     }
 }

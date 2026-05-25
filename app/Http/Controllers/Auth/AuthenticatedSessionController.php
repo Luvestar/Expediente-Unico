@@ -13,21 +13,20 @@ use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
-    /**
-     * Display the login view.
-     */
-    public function create(): View
+    public function create(Request $request, $guard = null): View
     {
-        return view('auth.login');
+        if (!$guard) {
+            $guard = $request->query('guard', 'web');
+        }
+        
+        return view('auth.login', compact('guard'));
     }
 
-    /**
-     * Handle an incoming authentication request.
-     */
     public function store(LoginRequest $request): RedirectResponse
     {
-        // Limitar intentos: 5 intentos por minuto por IP
-        $key = 'login-attempts:' . $request->ip();
+        $guard = $request->input('guard', 'web');
+        
+        $key = 'login-attempts:' . $request->ip() . ':' . $guard;
         
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $seconds = RateLimiter::availableIn($key);
@@ -36,73 +35,110 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
 
-        $request->authenticate();
+        $credentials = $request->only('email', 'password');
+        $remember = $request->filled('remember');
         
-        $user = Auth::user();
-        
-        // Verificar si el usuario está activo
-        if (!$user->activo) {
-            Auth::guard('web')->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-            return back()->withErrors(['email' => 'Tu cuenta está desactivada. Contacta al administrador.']);
-        }
-        
-        // Limpiar contador de intentos si el login fue exitoso
-        RateLimiter::clear($key);
-        
-        $request->session()->regenerate();
-        
-        // Login para Industria
-        if ($user->area_id == 1) {
-            if ($user->hasRole('Administrador de área') || 
-                $user->hasRole('Jefe de área') || 
-                $user->hasRole('Usuario')) {
-                return redirect()->route('industria.estadisticas');
+        if (Auth::guard($guard)->attempt($credentials, $remember)) {
+            $user = Auth::guard($guard)->user();
+            
+            if (!$user->activo) {
+                Auth::guard($guard)->logout();
+                RateLimiter::hit($key, 60);
+                return back()->withErrors(['email' => 'Tu cuenta está desactivada.']);
             }
-        }
-        
-        // Login para Desarrollo Urbano
-        if ($user->area_id == 2) {
-            if ($user->hasRole('Administrador de área') || 
-                $user->hasRole('Jefe de área') || 
-                $user->hasRole('Usuario')) {
-                return redirect()->route('desarrollo.documentos.index');
+            
+            $accessValidation = $this->validateUserAccess($user, $guard);
+            
+            if (!$accessValidation['allowed']) {
+                Auth::guard($guard)->logout();
+                RateLimiter::hit($key, 60);
+                return back()->withErrors(['email' => $accessValidation['message']]);
             }
+            
+            RateLimiter::clear($key);
+            $request->session()->regenerate();
+            $request->session()->put('current_guard', $guard);
+            
+            return $this->redirectByGuard($user, $guard);
         }
         
-        // Login para Protección Civil
-        if ($user->area_id == 3) {
-            if ($user->hasRole('Administrador de área') || 
-                $user->hasRole('Jefe de área') || 
-                $user->hasRole('Usuario')) {
-                return redirect()->route('proteccion.documentos.index');
-            }
-        }
+        RateLimiter::hit($key, 60);
         
-        // Login para Ingresos
-        if ($user->area_id == 4) {
-            if ($user->hasRole('Administrador de área') || 
-                $user->hasRole('Jefe de área') || 
-                $user->hasRole('Usuario')) {
-                return redirect()->route('ingresos.documentos.index');
-            }
-        }
-        
-        return redirect()->intended(route('dashboard', absolute: false));
+        throw ValidationException::withMessages([
+            'email' => 'Las credenciales no coinciden.',
+        ]);
     }
 
-    /**
-     * Destroy an authenticated session.
-     */
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::guard('web')->logout();
-
+        $guard = $request->session()->get('current_guard', 'web');
+        
+        Auth::guard($guard)->logout();
+        
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
-
-        return redirect('/');
+        
+        return redirect()->route('login', ['guard' => $guard]);
+    }
+    
+    private function validateUserAccess($user, string $guard): array
+    {
+        switch ($guard) {
+            case 'admin':
+                return [
+                    'allowed' => ($user->rol === 'Administrador general'),
+                    'message' => 'No tienes permisos de administrador.'
+                ];
+                
+            case 'industria':
+                return [
+                    'allowed' => ($user->area_id == 1 && in_array($user->rol, ['Administrador de área', 'Jefe de área', 'Usuario'])),
+                    'message' => 'No perteneces al área de Industria.'
+                ];
+                
+            case 'desarrollo':
+                return [
+                    'allowed' => ($user->area_id == 2 && in_array($user->rol, ['Administrador de área', 'Jefe de área', 'Usuario'])),
+                    'message' => 'No perteneces al área de Desarrollo Urbano.'
+                ];
+                
+            case 'proteccion':
+                return [
+                    'allowed' => ($user->area_id == 3 && in_array($user->rol, ['Administrador de área', 'Jefe de área', 'Usuario'])),
+                    'message' => 'No perteneces al área de Protección Civil.'
+                ];
+                
+            case 'ingresos':
+                return [
+                    'allowed' => ($user->area_id == 4 && in_array($user->rol, ['Administrador de área', 'Jefe de área', 'Usuario'])),
+                    'message' => 'No perteneces al área de Ingresos.'
+                ];
+                
+            default:
+                return ['allowed' => true, 'message' => ''];
+        }
+    }
+    
+    private function redirectByGuard($user, string $guard): RedirectResponse
+    {
+        switch ($guard) {
+            case 'admin':
+                return redirect()->intended(route('admin.usuarios'));
+                
+            case 'industria':
+                return redirect()->intended(route('industria.estadisticas'));
+                
+            case 'desarrollo':
+                return redirect()->intended(route('desarrollo.documentos.index'));
+                
+            case 'proteccion':
+                return redirect()->intended(route('proteccion.documentos.index'));
+                
+            case 'ingresos':
+                return redirect()->intended(route('ingresos.documentos.index'));
+                
+            default:
+                return redirect()->intended(route('admin.usuarios'));
+        }
     }
 }

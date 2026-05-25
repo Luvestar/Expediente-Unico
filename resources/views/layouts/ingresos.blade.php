@@ -10,8 +10,12 @@
     <link rel="stylesheet" href="{{ asset('css/tepeaca.css') }}?v={{ time() }}">
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
+    @php
+        $currentGuard = session('current_guard', 'ingresos');
+        $user = Auth::guard($currentGuard)->user();
+    @endphp
+
     <div class="wrapper">
-        <!-- Navbar -->
         <nav class="main-header navbar navbar-expand navbar-white navbar-light">
             <ul class="navbar-nav">
                 <li class="nav-item">
@@ -23,9 +27,9 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">
                         <i class="fas fa-user-circle"></i> 
-                        {{ Auth::user()->nombre_completo ?? Auth::user()->name }}
+                        {{ $user->nombre_completo ?? $user->name }}
                         <small class="text-muted d-block">
-                            {{ Auth::user()->area->nombre ?? 'Sistema' }}
+                            {{ $user->area->nombre ?? 'Ingresos' }}
                         </small>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right">
@@ -42,9 +46,7 @@
             </ul>
         </nav>
 
-        <!-- Sidebar -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
-            <!-- Logo personalizado con ícono -->
             <a href="{{ route('ingresos.documentos.index') }}" class="brand-link">
                 <div class="brand-image img-circle elevation-3 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px; background-color: #ffffff;">
                     <i class="fas fa-coins" style="color: #7B1B58; font-size: 18px;"></i>
@@ -56,18 +58,18 @@
             <div class="sidebar">
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                     <div class="info">
-                        <a href="#" class="d-block">{{ Auth::user()->nombre_completo ?? Auth::user()->name }}</a>
+                        <a href="#" class="d-block">{{ $user->nombre_completo ?? $user->name }}</a>
                         <small class="text-muted">
-                            @if(Auth::user()->hasRole('Administrador de área'))
+                            @if($user->hasRole('Administrador de área'))
                                 <span class="badge badge-warning">Administrador de área</span>
-                            @elseif(Auth::user()->hasRole('Jefe de área'))
+                            @elseif($user->hasRole('Jefe de área'))
                                 <span class="badge badge-info">Jefe de área</span>
                             @else
                                 <span class="badge badge-secondary">Usuario</span>
                             @endif
                         </small>
                         <div class="text-muted small mt-1">
-                            <i class="fas fa-building"></i> {{ Auth::user()->area->nombre ?? 'Sistema' }}
+                            <i class="fas fa-building"></i> {{ $user->area->nombre ?? 'Ingresos' }}
                         </div>
                     </div>
                 </div>

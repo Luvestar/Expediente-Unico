@@ -14,12 +14,14 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'rol' => \App\Http\Middleware\VerificarRol::class,
             'area' => \App\Http\Middleware\VerificarArea::class,
+            'multi.session' => \App\Http\Middleware\MultiSessionGuard::class,
         ]);
         
         // Agregar middlewares de seguridad al grupo 'web'
         $middleware->appendToGroup('web', [
             \App\Http\Middleware\SecurityHeaders::class,
             \App\Http\Middleware\SanitizeInput::class,
+            \App\Http\Middleware\ValidatePdfUpload::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
